@@ -70,7 +70,7 @@ pub async fn get_client_stream(settings: &Shared) -> Result<GenericStream, Error
         ))
     })?;
 
-    if settings.insane_allow_insecure_connections {
+    if let Some(true) = settings.insane_allow_insecure_connections {
         return Ok(Box::new(tcp_stream));
     }
 
@@ -96,7 +96,7 @@ pub async fn get_listener(settings: &Shared) -> Result<GenericListener, Error> {
         Error::Connection(format!("Failed to listen on address {address}. {err}"))
     })?;
 
-    if settings.insane_allow_insecure_connections {
+    if let Some(true) = settings.insane_allow_insecure_connections {
         return Ok(Box::new(tcp_listener));
     }
 
