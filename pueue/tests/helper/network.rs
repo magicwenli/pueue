@@ -38,6 +38,10 @@ async fn get_authenticated_stream(shared: &Shared) -> Result<GenericStream> {
         }
     };
 
+    if let Some(true) = shared.insane_allow_insecure_connections {
+        return Ok(stream);
+    }
+
     // Next we do a handshake with the daemon
     // 1. Client sends the secret to the daemon.
     // 2. If successful, the daemon responds with their version.

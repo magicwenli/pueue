@@ -30,6 +30,7 @@ pub fn get_shared_settings(
         daemon_cert: Some(tempdir_path.join("certs").join("daemon.cert")),
         daemon_key: Some(tempdir_path.join("certs").join("daemon.key")),
         shared_secret_path: Some(tempdir_path.join("secret")),
+        insane_allow_insecure_connections: None,
     };
 
     (shared_settings, tempdir)

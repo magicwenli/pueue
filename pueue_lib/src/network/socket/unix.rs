@@ -41,6 +41,17 @@ pub(crate) struct TlsTcpListener {
 }
 
 #[async_trait]
+impl Listener for TcpListener {
+    async fn accept<'a>(&'a self) -> Result<GenericStream, Error> {
+        let (stream, _) = self
+            .accept()
+            .await
+            .map_err(|err| Error::IoError("accepting new tcp connection.".to_string(), err))?;
+        Ok(Box::new(stream))
+    }
+}
+
+#[async_trait]
 impl Listener for TlsTcpListener {
     async fn accept<'a>(&'a self) -> Result<GenericStream, Error> {
         let (stream, _) = self
@@ -73,6 +84,7 @@ impl Listener for UnixListener {
 /// This is necessary to write generic functions where both types can be used.
 pub trait Stream: AsyncRead + AsyncWrite + Unpin + Send {}
 impl Stream for UnixStream {}
+impl Stream for TcpStream {}
 impl Stream for tokio_rustls::server::TlsStream<TcpStream> {}
 impl Stream for tokio_rustls::client::TlsStream<TcpStream> {}
 
@@ -108,6 +120,10 @@ pub async fn get_client_stream(settings: &Shared) -> Result<GenericStream, Error
             "Failed to connect to the daemon on {address}. Did you start it?"
         ))
     })?;
+
+    if let Some(true) = settings.insane_allow_insecure_connections {
+        return Ok(Box::new(tcp_stream));
+    }
 
     // Get the configured rustls TlsConnector
     let tls_connector = get_tls_connector(settings)
@@ -176,6 +192,10 @@ pub async fn get_listener(settings: &Shared) -> Result<GenericListener, Error> {
     let tcp_listener = TcpListener::bind(&address)
         .await
         .map_err(|err| Error::IoError("binding tcp listener to address".to_string(), err))?;
+
+    if let Some(true) = settings.insane_allow_insecure_connections {
+        return Ok(Box::new(tcp_listener));
+    }
 
     // This is the TLS acceptor, which initializes the TLS layer
     let tls_acceptor = get_tls_listener(settings)?;

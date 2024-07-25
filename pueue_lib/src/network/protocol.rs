@@ -130,23 +130,11 @@ pub async fn receive_message(stream: &mut GenericStream) -> Result<Message, Erro
 mod test {
     use std::time::Duration;
 
-    use async_trait::async_trait;
     use pretty_assertions::assert_eq;
     use tokio::net::{TcpListener, TcpStream};
     use tokio::task;
 
     use super::*;
-    use crate::network::socket::Stream as PueueStream;
-
-    // Implement generic Listener/Stream traits, so we can test stuff on normal TCP
-    #[async_trait]
-    impl Listener for TcpListener {
-        async fn accept<'a>(&'a self) -> Result<GenericStream, Error> {
-            let (stream, _) = self.accept().await?;
-            Ok(Box::new(stream))
-        }
-    }
-    impl PueueStream for TcpStream {}
 
     #[tokio::test]
     async fn test_single_huge_payload() -> Result<(), Error> {

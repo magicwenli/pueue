@@ -80,6 +80,8 @@ pub struct Shared {
     ///
     /// The path to the file containing the shared secret used to authenticate the client.
     pub shared_secret_path: Option<PathBuf>,
+
+    pub insane_allow_insecure_connections: Option<bool>,
 }
 
 /// All settings which are used by the client
@@ -162,6 +164,8 @@ impl Default for Shared {
             daemon_cert: None,
             daemon_key: None,
             shared_secret_path: None,
+
+            insane_allow_insecure_connections: None,
         }
     }
 }
